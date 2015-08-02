@@ -23,11 +23,11 @@ gulp.task('jslint', function(){
 		.pipe($.jshint.reporter());
 });
 
-gulp.task('buildjs', function(){
-	return gulp.src('./')
+gulp.task('build', function(){
+	return gulp.src('./gesture.js')
 		.pipe($.uglify())
-		.pipe($.concat('gesture_min.js'))
-		.pipe(gulp.dest(paths.destDir));
+		//.pipe($.concat('gesture_min.js'))
+		.pipe(gulp.dest('./build'));
 });
 
 // other task
@@ -36,15 +36,13 @@ gulp.task('reload', function(){
 });
 
 gulp.task('watch', function(){
-	gulp.watch([paths.htmlDir], ['copy', 'reload']);
-	gulp.watch([paths.cssDir], ['copy', 'reload']);
-	gulp.watch([paths.jsDir], ['concatjs', 'reload']);
+	gulp.watch(['./'], ['build', 'reload']);
 });
 
 gulp.task('test', function(){
 	runSequence(
 		'jslint',
-		'concatjs',
+		'build',
 		'watch',
 		'browserSync'
 	);
