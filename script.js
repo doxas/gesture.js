@@ -10,6 +10,8 @@ window.onload = function(){
 	// GJS.doubleSwipeDown(window, function(){console.log('double swipe down!!');});
 	// GJS.doubleSwipeLeft(window, function(){console.log('double swipe left!!');});
 	// GJS.doubleSwipeRight(window, function(){console.log('double swipe right!!');});
-	GJS.pinch(window, function(){console.log('pinch!');});
+	// GJS.pinch(window, function(){console.log('pinch!');});
+	GJS.pinchIn(window, function(){console.log('pinch in!!');});
+	GJS.pinchOut(window, function(){console.log('pinch out!!');});
 };
 

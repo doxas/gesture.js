@@ -3,10 +3,10 @@ function gestureJsCommon(){}
 (function(){
 	'use strict';
 	// const
-	var DRAG_LENGTH = 50; // 一部のイベントが発生するまでのドラッグ操作の距離
-	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲
-	var PINCH_LENGTH = 10; // ピンチイベントが発生するまでのドラッグ操作の距離
-	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲
+	var DRAG_LENGTH = 50; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
+	var PINCH_LENGTH = 10; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
 
 	// = custom event =========================================================
 	// - swipe ----------------------------------------------------------------
@@ -226,6 +226,57 @@ function gestureJsCommon(){}
 		return true;
 	};
 
+	// pinch inout
+	gestureJsCommon.prototype.gesturePinch = function(target, callback, type){
+		if(!target.addEventListener){logText(type); return false;}
+		var eo = new eventObject(callback);
+		eventSetter(
+			target,
+			function(eve){
+				var p = eventHub(eve);
+				if(eo.downFlg){return;}
+				eo.startX = p.px; eo.startY = p.py;
+				eo.secondStartX = -1; eo.secondStartY = -1;
+				eo.downCount = 1; eo.downFlg = true; eo.startLength = -1;
+			},
+			function(eve){
+				eo.downFlg = false;
+			},
+			function(eve){
+				var p = eventHub(eve, 0);
+				var q = eventHub(eve, 1);
+				if(eo.downFlg && q != null){
+					++eo.downCount;
+					var v = vector(eo.startX, eo.startY, p.px, p.py);
+					if(eo.downCount > 5 && v.length > PINCH_LENGTH){
+						if(eo.secondStartX < 0){
+							eo.secondStartX = q.px;
+							eo.secondStartY = q.py;
+							eo.startLength = length2d(eo.startX, eo.startY, q.px, q.py);
+						}else{
+							var w = vector(eo.secondStartX, eo.secondStartY, q.px, q.py);
+							var l = length2d(p.px, p.py, q.px, q.py);
+							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
+							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
+								eo.callback();
+							}
+							eo.startLength = l;
+						}
+					}
+				}
+			}
+		);
+		return true;
+	};
+	// pinch in
+	gestureJsCommon.prototype.pinchIn = function(target, callback){
+		return this.gesturePinch(target, callback, 'pinch in');
+	};
+	// pinch out
+	gestureJsCommon.prototype.pinchOut = function(target, callback){
+		return this.gesturePinch(target, callback, 'pinch out');
+	};
+
 	// = utility ==============================================================
 	function eventSetter(target, funcDown, funcUp, funcMove){
 		target.addEventListener('mousedown',  funcDown, false);
@@ -273,6 +324,7 @@ function gestureJsCommon(){}
 		this.startY = 0;
 		this.secondStartX = 0;
 		this.secondStartY = 0;
+		this.startLength = 0;
 		this.downCount = 0;
 		this.downFlg = false;
 		this.applyFlg = false;
