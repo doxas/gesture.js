@@ -91,6 +91,7 @@ function gestureJsCommon(){}
 			target,
 			function(eve){
 				var p = eventHub(eve);
+				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
