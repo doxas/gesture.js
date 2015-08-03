@@ -99,20 +99,20 @@ function gestureJsCommon(){}
 		return true;
 	};
 	// swipe up
-	gestureJsCommon.prototype.swipeUp = function(target, callback){
-		return this.gestureSwipeDotDiff(target, callback, 'swipe up', 0.0, 1.0);
+	gestureJsCommon.prototype.swipeUp = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'swipe up', 0.0, 1.0);
 	};
 	// swipe down
-	gestureJsCommon.prototype.swipeDown = function(target, callback){
-		return this.gestureSwipeDotDiff(target, callback, 'swipe down', 0.0, -1.0);
+	gestureJsCommon.prototype.swipeDown = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'swipe down', 0.0, -1.0);
 	};
 	// swipe left
-	gestureJsCommon.prototype.swipeLeft = function(target, callback){
-		return this.gestureSwipeDotDiff(target, callback, 'swipe left', -1.0, 0.0);
+	gestureJsCommon.prototype.swipeLeft = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'swipe left', -1.0, 0.0);
 	};
 	// swipe right
-	gestureJsCommon.prototype.swipeRight = function(target, callback){
-		return this.gestureSwipeDotDiff(target, callback, 'swipe right', 1.0, 0.0);
+	gestureJsCommon.prototype.swipeRight = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'swipe right', 1.0, 0.0);
 	};
 
 	// - double swipe ---------------------------------------------------------
@@ -212,20 +212,20 @@ function gestureJsCommon(){}
 		return true;
 	};
 	// double swipe up
-	gestureJsCommon.prototype.doubleSwipeUp = function(target, callback){
-		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe up', 0.0, 1.0);
+	gestureJsCommon.prototype.doubleSwipeUp = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureDoubleSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'double swipe up', 0.0, 1.0);
 	};
 	// double swipe down
-	gestureJsCommon.prototype.doubleSwipeDown = function(target, callback){
-		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe down', 0.0, -1.0);
+	gestureJsCommon.prototype.doubleSwipeDown = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureDoubleSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'double swipe down', 0.0, -1.0);
 	};
 	// double swipe left
-	gestureJsCommon.prototype.doubleSwipeLeft = function(target, callback){
-		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe left', -1.0, 0.0);
+	gestureJsCommon.prototype.doubleSwipeLeft = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureDoubleSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'double swipe left', -1.0, 0.0);
 	};
 	// double swipe right
-	gestureJsCommon.prototype.doubleSwipeRight = function(target, callback){
-		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe right', 1.0, 0.0);
+	gestureJsCommon.prototype.doubleSwipeRight = function(target, startCallback, endCallback, moveCallback){
+		return this.gestureDoubleSwipeDotDiff(target, startCallback, endCallback, moveCallback, 'double swipe right', 1.0, 0.0);
 	};
 
 	// - pinch ----------------------------------------------------------------
@@ -327,12 +327,12 @@ function gestureJsCommon(){}
 		return true;
 	};
 	// pinch in
-	gestureJsCommon.prototype.pinchIn = function(target, callback){
-		return this.gesturePinch(target, callback, 'pinch in');
+	gestureJsCommon.prototype.pinchIn = function(target, startCallback, endCallback, moveCallback){
+		return this.gesturePinch(target, startCallback, endCallback, moveCallback, 'pinch in');
 	};
 	// pinch out
-	gestureJsCommon.prototype.pinchOut = function(target, callback){
-		return this.gesturePinch(target, callback, 'pinch out');
+	gestureJsCommon.prototype.pinchOut = function(target, startCallback, endCallback, moveCallback){
+		return this.gesturePinch(target, startCallback, endCallback, moveCallback, 'pinch out');
 	};
 
 	// = utility ==============================================================
