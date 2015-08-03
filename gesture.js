@@ -7,7 +7,7 @@ function gestureJsCommon(){}
 	var DOT_PRODUCT_RANGE = 0.95; // 内積で一致するとみなす許容範囲
 
 	// = custom event =========================================================
-	// swipe
+	// - swipe ----------------------------------------------------------------
 	gestureJsCommon.prototype.swipe = function(target, callback){
 		if(!target.addEventListener){logText('swipe'); return false;}
 		var eo = new eventObject(callback);
@@ -68,22 +68,22 @@ function gestureJsCommon(){}
 	};
 	// swipe up
 	gestureJsCommon.prototype.swipeUp = function(target, callback){
-		this.gestureSwipeDotDiff(target, callback, 'swipe up', 0.0, 1.0);
+		return this.gestureSwipeDotDiff(target, callback, 'swipe up', 0.0, 1.0);
 	};
 	// swipe down
 	gestureJsCommon.prototype.swipeDown = function(target, callback){
-		this.gestureSwipeDotDiff(target, callback, 'swipe down', 0.0, -1.0);
+		return this.gestureSwipeDotDiff(target, callback, 'swipe down', 0.0, -1.0);
 	};
 	// swipe left
 	gestureJsCommon.prototype.swipeLeft = function(target, callback){
-		this.gestureSwipeDotDiff(target, callback, 'swipe left', -1.0, 0.0);
+		return this.gestureSwipeDotDiff(target, callback, 'swipe left', -1.0, 0.0);
 	};
 	// swipe right
 	gestureJsCommon.prototype.swipeRight = function(target, callback){
-		this.gestureSwipeDotDiff(target, callback, 'swipe right', 1.0, 0.0);
+		return this.gestureSwipeDotDiff(target, callback, 'swipe right', 1.0, 0.0);
 	};
 
-	// double swipe 実機検証でしかダブルスワイプのテストはできないっぽい
+	// - double swipe ---------------------------------------------------------
 	gestureJsCommon.prototype.doubleSwipe = function(target, callback){
 		if(!target.addEventListener){logText('double swipe'); return false;}
 		var eo = new eventObject(callback);
@@ -123,6 +123,63 @@ function gestureJsCommon(){}
 			}
 		);
 		return true;
+	};
+
+	// double swipe dot diff
+	gestureJsCommon.prototype.gestureDoubleSwipeDotDiff = function(target, callback, type, dx, dy){
+		if(!target.addEventListener){logText(type); return false;}
+		var eo = new eventObject(callback);
+		eventSetter(
+			target,
+			function(eve){
+				var p = eventHub(eve);
+				if(eo.downFlg){return;}
+				eo.startX = p.px; eo.startY = p.py;
+				eo.secondStartX = -1; eo.secondStartY = -1;
+				eo.downCount = 1; eo.downFlg = true;
+			},
+			function(eve){
+				eo.downFlg = false;
+			},
+			function(eve){
+				var p = eventHub(eve, 0);
+				var q = eventHub(eve, 1);
+				if(eo.downFlg && q != null){
+					++eo.downCount;
+					var v = vector(eo.startX, eo.startY, p.px, p.py);
+					if(eo.downCount > 5 && v.length > DRAG_LENGTH){
+						if(eo.secondStartX < 0){
+							eo.secondStartX = q.px;
+							eo.secondStartY = q.py;
+						}else{
+							var w = vector(eo.secondStartX, eo.secondStartY, q.px, q.py);
+							if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
+							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
+								eo.downFlg = false;
+								eo.callback();
+							}
+						}
+					}
+				}
+			}
+		);
+		return true;
+	};
+	// double swipe up
+	gestureJsCommon.prototype.doubleSwipeUp = function(target, callback){
+		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe up', 0.0, 1.0);
+	};
+	// double swipe down
+	gestureJsCommon.prototype.doubleSwipeDown = function(target, callback){
+		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe down', 0.0, -1.0);
+	};
+	// double swipe left
+	gestureJsCommon.prototype.doubleSwipeLeft = function(target, callback){
+		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe left', -1.0, 0.0);
+	};
+	// double swipe right
+	gestureJsCommon.prototype.doubleSwipeRight = function(target, callback){
+		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe right', 1.0, 0.0);
 	};
 
 	// = utility ==============================================================
