@@ -3,14 +3,15 @@ function gestureJsCommon(){}
 (function(current){
 	'use strict';
 	// const
-	var DRAG_LENGTH = 50; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DRAG_LENGTH = 30; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
-	var PINCH_LENGTH = 25; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var PINCH_LENGTH = 15; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
 	var ASYNCHRONOUS = true; // 非同期
-	var WAIT_COUNT_SWIPE = 20; // スワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_DOUBLE_SWIPE = 10; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_PINCH = 5; // ピンチによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_SWIPE = 10; // スワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_DOUBLE_SWIPE = 8; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_PINCH = 6; // ピンチによる継続的ドラッグ操作の待ちフレーム
+	var DURATION_SUBTRACT = 3; // 持続系イベントから突発系イベントを優先するための減算値
 
 	// private
 	var syncFlg = false; // 同期モードでほかのイベントが発生しているかどうかを示すフラグ
@@ -39,21 +40,21 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				if(eo.downFlg){
 					++eo.downCount;
 					var p = eventHub(eve);
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(eo.applyFlg || (eo.downCount > WAIT_COUNT_SWIPE && v.length > DRAG_LENGTH)){
 						eo.applyFlg = true;
-						if(!ASYNCHRONOUS){syncFlg = true;}
+						if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 						if(eo.moveCallback){eo.moveCallback();}
 					}
 				}
@@ -76,9 +77,9 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
@@ -88,9 +89,9 @@ function gestureJsCommon(){}
 					var p = eventHub(eve);
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
-					   eo.downCount > WAIT_COUNT_SWIPE && v.length > DRAG_LENGTH){
+					   eo.downCount > WAIT_COUNT_SWIPE - DURATION_SUBTRACT && v.length > DRAG_LENGTH){
 						eo.downFlg = false;
-						if(!ASYNCHRONOUS){syncFlg = true;}
+						if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 						if(eo.moveCallback){eo.moveCallback();}
 					}
 				}
@@ -131,14 +132,14 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
@@ -153,7 +154,7 @@ function gestureJsCommon(){}
 							if(eo.applyFlg ||
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.applyFlg = true;
-								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
@@ -180,9 +181,9 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
@@ -192,7 +193,7 @@ function gestureJsCommon(){}
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE && v.length > DRAG_LENGTH){
+					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE - DURATION_SUBTRACT && v.length > DRAG_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -201,7 +202,7 @@ function gestureJsCommon(){}
 							if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.downFlg = false;
-								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
@@ -244,14 +245,14 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
@@ -266,7 +267,7 @@ function gestureJsCommon(){}
 							if(eo.applyFlg ||
 							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								eo.applyFlg = true;
-								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
@@ -293,9 +294,9 @@ function gestureJsCommon(){}
 				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
-				if(!ASYNCHRONOUS && syncFlg){return;}
+				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
-				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
@@ -305,7 +306,7 @@ function gestureJsCommon(){}
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > WAIT_COUNT_PINCH && v.length > PINCH_LENGTH){
+					if(eo.downCount > WAIT_COUNT_PINCH - DURATION_SUBTRACT && v.length > PINCH_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -315,7 +316,7 @@ function gestureJsCommon(){}
 							var l = length2d(p.px, p.py, q.px, q.py);
 							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
 							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
-								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback();}
 							}
 							eo.startLength = l;
@@ -386,6 +387,7 @@ function gestureJsCommon(){}
 		this.downCount = 0;
 		this.downFlg = false;
 		this.applyFlg = false;
+		this.entryFlg = false;
 		this.startCallback = startCallback;
 		this.endCallback = endCallback;
 		this.moveCallback = moveCallback;

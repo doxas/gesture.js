@@ -1,6 +1,6 @@
 
 window.onload = function(){
-	GJS.setParam(null, null, null, null, true); // sync
+	GJS.setParam(null, null, null, null, false); // sync => false, async => true
 	GJS.swipe(window, null, null, function(){console.log('swipe!');});
 	GJS.swipeUp(window, null, null, function(){console.log('swipe up!!');});
 	GJS.swipeDown(window, null, null, function(){console.log('swipe down!!');});
