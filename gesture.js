@@ -4,7 +4,9 @@ function gestureJsCommon(){}
 	'use strict';
 	// const
 	var DRAG_LENGTH = 50; // 一部のイベントが発生するまでのドラッグ操作の距離
-	var DOT_PRODUCT_RANGE = 0.95; // 内積で一致するとみなす許容範囲
+	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲
+	var PINCH_LENGTH = 10; // ピンチイベントが発生するまでのドラッグ操作の距離
+	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲
 
 	// = custom event =========================================================
 	// - swipe ----------------------------------------------------------------
@@ -182,6 +184,48 @@ function gestureJsCommon(){}
 		return this.gestureDoubleSwipeDotDiff(target, callback, 'double swipe right', 1.0, 0.0);
 	};
 
+	// - pinch ----------------------------------------------------------------
+	gestureJsCommon.prototype.pinch = function(target, callback){
+		if(!target.addEventListener){logText('pinch'); return false;}
+		var eo = new eventObject(callback);
+		eventSetter(
+			target,
+			function(eve){
+				var p = eventHub(eve);
+				if(eo.downFlg){return;}
+				eo.startX = p.px; eo.startY = p.py;
+				eo.secondStartX = -1; eo.secondStartY = -1;
+				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
+			},
+			function(eve){
+				eo.downFlg = false;
+				eo.applyFlg = false;
+			},
+			function(eve){
+				var p = eventHub(eve, 0);
+				var q = eventHub(eve, 1);
+				if(eo.downFlg && q != null){
+					++eo.downCount;
+					var v = vector(eo.startX, eo.startY, p.px, p.py);
+					if(eo.downCount > 5 && v.length > PINCH_LENGTH){
+						if(eo.secondStartX < 0){
+							eo.secondStartX = q.px;
+							eo.secondStartY = q.py;
+						}else{
+							var w = vector(eo.secondStartX, eo.secondStartY, q.px, q.py);
+							if(eo.applyFlg ||
+							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
+								eo.applyFlg = true;
+								eo.callback();
+							}
+						}
+					}
+				}
+			}
+		);
+		return true;
+	};
+
 	// = utility ==============================================================
 	function eventSetter(target, funcDown, funcUp, funcMove){
 		target.addEventListener('mousedown',  funcDown, false);
@@ -215,6 +259,9 @@ function gestureJsCommon(){}
 	}
 	function dot2d(vx, vy, tx, ty){
 		return vx * tx + vy * ty;
+	}
+	function length2d(vx, vy, tx, ty){
+		return Math.sqrt(vx * tx + vy * ty);
 	}
 	function logText(type){
 		console.log('event listen is failed [' + type + ']');
