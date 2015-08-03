@@ -1,37 +1,60 @@
 var GJS;
 function gestureJsCommon(){}
-(function(){
+(function(current){
 	'use strict';
 	// const
 	var DRAG_LENGTH = 50; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
 	var PINCH_LENGTH = 25; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
+	var ASYNCHRONOUS = true; // 非同期
+	var WAIT_COUNT_SWIPE = 20; // スワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_DOUBLE_SWIPE = 10; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_PINCH = 5; // ピンチによる継続的ドラッグ操作の待ちフレーム
+
+	// private
+	var syncFlg = false; // 同期モードでほかのイベントが発生しているかどうかを示すフラグ
+
+	// = construct ============================================================
+	gestureJsCommon.prototype.setParam = function(DL, DPR, PL, DPPR, ASYNC){
+		if(DL    != null){DRAG_LENGTH = DL;}
+		if(DPR   != null){DOT_PRODUCT_RANGE = DPR;}
+		if(PL    != null){PINCH_LENGTH = PL;}
+		if(DPPR  != null){DOT_PRODUCT_PINCH_RANGE = DPPR;}
+		if(ASYNC != null){ASYNCHRONOUS = ASYNC;}
+	};
 
 	// = custom event =========================================================
 	// - swipe ----------------------------------------------------------------
-	gestureJsCommon.prototype.swipe = function(target, callback){
+	gestureJsCommon.prototype.swipe = function(target, startCallback, endCallback, moveCallback){
 		if(!target.addEventListener){logText('swipe'); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				eo.startX = p.px; eo.startY = p.py;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				if(eo.downFlg){
 					++eo.downCount;
 					var p = eventHub(eve);
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.applyFlg || (eo.downCount > 5 && v.length > DRAG_LENGTH)){
+					if(eo.applyFlg || (eo.downCount > WAIT_COUNT_SWIPE && v.length > DRAG_LENGTH)){
 						eo.applyFlg = true;
-						eo.callback();
+						if(!ASYNCHRONOUS){syncFlg = true;}
+						if(eo.moveCallback){eo.moveCallback();}
 					}
 				}
 			}
@@ -40,28 +63,35 @@ function gestureJsCommon(){}
 	};
 
 	// swipe dot diff
-	gestureJsCommon.prototype.gestureSwipeDotDiff = function(target, callback, type, dx, dy){
+	gestureJsCommon.prototype.gestureSwipeDotDiff = function(target, startCallback, endCallback, moveCallback, type, dx, dy){
 		if(!target.addEventListener){logText(type); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				eo.startX = p.px; eo.startY = p.py;
 				eo.downCount = 1; eo.downFlg = true;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				if(eo.downFlg){
 					++eo.downCount;
 					var p = eventHub(eve);
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
-					   eo.downCount > 5 && v.length > DRAG_LENGTH){
+					   eo.downCount > WAIT_COUNT_SWIPE && v.length > DRAG_LENGTH){
 						eo.downFlg = false;
-						eo.callback();
+						if(!ASYNCHRONOUS){syncFlg = true;}
+						if(eo.moveCallback){eo.moveCallback();}
 					}
 				}
 			}
@@ -86,29 +116,35 @@ function gestureJsCommon(){}
 	};
 
 	// - double swipe ---------------------------------------------------------
-	gestureJsCommon.prototype.doubleSwipe = function(target, callback){
+	gestureJsCommon.prototype.doubleSwipe = function(target, startCallback, endCallback, moveCallback){
 		if(!target.addEventListener){logText('double swipe'); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > 5 && v.length > DRAG_LENGTH){
+					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE && v.length > DRAG_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -117,7 +153,8 @@ function gestureJsCommon(){}
 							if(eo.applyFlg ||
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.applyFlg = true;
-								eo.callback();
+								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
 					}
@@ -128,28 +165,34 @@ function gestureJsCommon(){}
 	};
 
 	// double swipe dot diff
-	gestureJsCommon.prototype.gestureDoubleSwipeDotDiff = function(target, callback, type, dx, dy){
+	gestureJsCommon.prototype.gestureDoubleSwipeDotDiff = function(target, startCallback, endCallback, moveCallback, type, dx, dy){
 		if(!target.addEventListener){logText(type); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > 5 && v.length > DRAG_LENGTH){
+					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE && v.length > DRAG_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -158,7 +201,8 @@ function gestureJsCommon(){}
 							if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.downFlg = false;
-								eo.callback();
+								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
 					}
@@ -185,29 +229,35 @@ function gestureJsCommon(){}
 	};
 
 	// - pinch ----------------------------------------------------------------
-	gestureJsCommon.prototype.pinch = function(target, callback){
+	gestureJsCommon.prototype.pinch = function(target, startCallback, endCallback, moveCallback){
 		if(!target.addEventListener){logText('pinch'); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > 5 && v.length > PINCH_LENGTH){
+					if(eo.downCount > WAIT_COUNT_PINCH && v.length > PINCH_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -216,7 +266,8 @@ function gestureJsCommon(){}
 							if(eo.applyFlg ||
 							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								eo.applyFlg = true;
-								eo.callback();
+								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(eo.moveCallback){eo.moveCallback();}
 							}
 						}
 					}
@@ -227,28 +278,34 @@ function gestureJsCommon(){}
 	};
 
 	// pinch inout
-	gestureJsCommon.prototype.gesturePinch = function(target, callback, type){
+	gestureJsCommon.prototype.gesturePinch = function(target, startCallback, endCallback, moveCallback, type){
 		if(!target.addEventListener){logText(type); return false;}
-		var eo = new eventObject(callback);
+		var eo = new eventObject(startCallback, endCallback, moveCallback);
 		eventSetter(
 			target,
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve);
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.startLength = -1;
+				if(eo.startCallback){eo.startCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				eo.downFlg = false;
+				if(!ASYNCHRONOUS){syncFlg = false;}
+				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > 5 && v.length > PINCH_LENGTH){
+					if(eo.downCount > WAIT_COUNT_PINCH && v.length > PINCH_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
@@ -258,7 +315,8 @@ function gestureJsCommon(){}
 							var l = length2d(p.px, p.py, q.px, q.py);
 							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
 							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
-								eo.callback();
+								if(!ASYNCHRONOUS){syncFlg = true;}
+								if(eo.moveCallback){eo.moveCallback();}
 							}
 							eo.startLength = l;
 						}
@@ -319,7 +377,7 @@ function gestureJsCommon(){}
 	}
 
 	// = event object =========================================================
-	function eventObject(callback){
+	function eventObject(startCallback, endCallback, moveCallback){
 		this.startX = 0;
 		this.startY = 0;
 		this.secondStartX = 0;
@@ -328,7 +386,9 @@ function gestureJsCommon(){}
 		this.downCount = 0;
 		this.downFlg = false;
 		this.applyFlg = false;
-		this.callback = callback;
+		this.startCallback = startCallback;
+		this.endCallback = endCallback;
+		this.moveCallback = moveCallback;
 	}
 })(this);
 GJS = new gestureJsCommon();
