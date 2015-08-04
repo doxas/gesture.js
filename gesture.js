@@ -3,15 +3,15 @@ function gestureJsCommon(){}
 (function(current){
 	'use strict';
 	// const
-	var DRAG_LENGTH = 30; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DRAG_LENGTH = 20; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
-	var PINCH_LENGTH = 15; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
-	var DOT_PRODUCT_PINCH_RANGE = 0.75; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
+	var PINCH_LENGTH = 10; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DOT_PRODUCT_PINCH_RANGE = 0.9; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
 	var ASYNCHRONOUS = true; // 非同期
-	var WAIT_COUNT_SWIPE = 10; // スワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_DOUBLE_SWIPE = 8; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_PINCH = 6; // ピンチによる継続的ドラッグ操作の待ちフレーム
-	var DURATION_SUBTRACT = 3; // 持続系イベントから突発系イベントを優先するための減算値
+	var WAIT_COUNT_SWIPE = 20; // スワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_DOUBLE_SWIPE = 12; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_PINCH = 8; // ピンチによる継続的ドラッグ操作の待ちフレーム
+	var DURATION_SUBTRACT = 5; // 持続系イベントから突発系イベントを優先するための減算値
 
 	// private
 	var syncFlg = false; // 同期モードでほかのイベントが発生しているかどうかを示すフラグ
@@ -47,6 +47,8 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
+				if(eve.changedTouches[1] != null){return;}
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				if(eo.downFlg){
 					++eo.downCount;
@@ -83,6 +85,8 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
+				if(eve.changedTouches[1] != null){return;}
 				if(!ASYNCHRONOUS && syncFlg){return;}
 				if(eo.downFlg){
 					++eo.downCount;
@@ -139,6 +143,7 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
@@ -187,6 +192,7 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
 				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
@@ -252,6 +258,7 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
@@ -300,6 +307,7 @@ function gestureJsCommon(){}
 				if(eo.endCallback){eo.endCallback();}
 			},
 			function(eve){
+				eve.preventDefault();
 				if(!ASYNCHRONOUS && syncFlg){return;}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
