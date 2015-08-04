@@ -37,18 +37,18 @@ function gestureJsCommon(){}
 				var p = eventHub(eve);
 				eo.startX = p.px; eo.startY = p.py;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
-				if(eve.changedTouches[1] != null){return;}
+				if(eve.changedTouches != null){if(eve.changedTouches[1] != null){return;}}
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){eo.downFlg = false; return;}
 				if(eo.downFlg){
 					++eo.downCount;
@@ -57,7 +57,7 @@ function gestureJsCommon(){}
 					if(eo.applyFlg || (eo.downCount > WAIT_COUNT_SWIPE && v.length > DRAG_LENGTH)){
 						eo.applyFlg = true;
 						if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-						if(eo.moveCallback){eo.moveCallback();}
+						if(eo.moveCallback){eo.moveCallback(eve);}
 					}
 				}
 			}
@@ -76,17 +76,17 @@ function gestureJsCommon(){}
 				var p = eventHub(eve);
 				eo.startX = p.px; eo.startY = p.py;
 				eo.downCount = 1; eo.downFlg = true;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
-				if(eve.changedTouches[1] != null){return;}
+				if(eve.changedTouches != null){if(eve.changedTouches[1] != null){return;}}
 				if(!ASYNCHRONOUS && syncFlg){return;}
 				if(eo.downFlg){
 					++eo.downCount;
@@ -96,7 +96,7 @@ function gestureJsCommon(){}
 					   eo.downCount > WAIT_COUNT_SWIPE - DURATION_SUBTRACT && v.length > DRAG_LENGTH){
 						eo.downFlg = false;
 						if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-						if(eo.moveCallback){eo.moveCallback();}
+						if(eo.moveCallback){eo.moveCallback(eve);}
 					}
 				}
 			}
@@ -133,14 +133,14 @@ function gestureJsCommon(){}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
@@ -160,7 +160,7 @@ function gestureJsCommon(){}
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.applyFlg = true;
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback();}
+								if(eo.moveCallback){eo.moveCallback(eve);}
 							}
 						}
 					}
@@ -183,13 +183,13 @@ function gestureJsCommon(){}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
@@ -209,7 +209,7 @@ function gestureJsCommon(){}
 							   dot2d(v.vx, v.vy, w.vx, w.vy) > DOT_PRODUCT_RANGE){
 								eo.downFlg = false;
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback();}
+								if(eo.moveCallback){eo.moveCallback(eve);}
 							}
 						}
 					}
@@ -248,14 +248,14 @@ function gestureJsCommon(){}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				eo.applyFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
@@ -275,7 +275,7 @@ function gestureJsCommon(){}
 							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								eo.applyFlg = true;
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback();}
+								if(eo.moveCallback){eo.moveCallback(eve);}
 							}
 						}
 					}
@@ -298,13 +298,13 @@ function gestureJsCommon(){}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.startLength = -1;
-				if(eo.startCallback){eo.startCallback();}
+				if(eo.startCallback){eo.startCallback(eve);}
 			},
 			function(eve){
 				if(!ASYNCHRONOUS && syncFlg && !eo.entryFlg){return;}
 				eo.downFlg = false;
 				if(!ASYNCHRONOUS){syncFlg = false; eo.entryFlg = false;}
-				if(eo.endCallback){eo.endCallback();}
+				if(eo.endCallback){eo.endCallback(eve);}
 			},
 			function(eve){
 				eve.preventDefault();
@@ -325,7 +325,7 @@ function gestureJsCommon(){}
 							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
 							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback();}
+								if(eo.moveCallback){eo.moveCallback(eve);}
 							}
 							eo.startLength = l;
 						}
