@@ -3,15 +3,16 @@ function gestureJsCommon(){}
 (function(current){
 	'use strict';
 	// const
-	var DRAG_LENGTH = 20; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var DRAG_LENGTH = 10; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
-	var PINCH_LENGTH = 10; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
+	var PINCH_LENGTH = 15; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_PINCH_RANGE = 0.9; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
 	var ASYNCHRONOUS = true; // 非同期
-	var WAIT_COUNT_SWIPE = 20; // スワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_DOUBLE_SWIPE = 12; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
-	var WAIT_COUNT_PINCH = 8; // ピンチによる継続的ドラッグ操作の待ちフレーム
-	var DURATION_SUBTRACT = 5; // 持続系イベントから突発系イベントを優先するための減算値
+	var WAIT_COUNT_SWIPE = 6; // スワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_DOUBLE_SWIPE = 4; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
+	var WAIT_COUNT_PINCH = 2; // ピンチによる継続的ドラッグ操作の待ちフレーム
+	var DURATION_SUBTRACT = 0; // 持続系イベントから突発系イベントを優先するための減算値
+	var DOWN_PEAK_COUNT = 10; // 突発系が起こらなくなるまでのフレーム数
 
 	// private
 	var syncFlg = false; // 同期モードでほかのイベントが発生しているかどうかを示すフラグ
@@ -92,8 +93,9 @@ function gestureJsCommon(){}
 					++eo.downCount;
 					var p = eventHub(eve);
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
-					   eo.downCount > WAIT_COUNT_SWIPE - DURATION_SUBTRACT && v.length > DRAG_LENGTH){
+					if(eo.downCount > WAIT_COUNT_SWIPE - DURATION_SUBTRACT && eo.downCount < DOWN_PEAK_COUNT &&
+					   dot2d(v.vx, v.vy, dx, dy) > DOT_PRODUCT_RANGE &&
+					   v.length > DRAG_LENGTH){
 						eo.downFlg = false;
 						if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 						if(eo.moveCallback){eo.moveCallback(eve);}
@@ -199,7 +201,8 @@ function gestureJsCommon(){}
 				if(eo.downFlg && q != null){
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
-					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE - DURATION_SUBTRACT && v.length > DRAG_LENGTH){
+					if(eo.downCount > WAIT_COUNT_DOUBLE_SWIPE - DURATION_SUBTRACT &&
+					   eo.downCount < DOWN_PEAK_COUNT && v.length > DRAG_LENGTH){
 						if(eo.secondStartX < 0){
 							eo.secondStartX = q.px;
 							eo.secondStartY = q.py;
