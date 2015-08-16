@@ -6,7 +6,7 @@ function gestureJsCommon(){}
 	var DRAG_LENGTH = 10; // 一部のイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
 	var DOT_PRODUCT_RANGE = 0.95; // スワイプ系操作で、方向に関する処理の判定の際に内積で一致するとみなす許容範囲（−1.0〜1.0）
 	var PINCH_LENGTH = 15; // ピンチイベントが発生するまでのドラッグ操作の距離（ピクセル単位）
-	var DOT_PRODUCT_PINCH_RANGE = 0.9; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
+	var DOT_PRODUCT_PINCH_RANGE = 0.8; // ピンチ操作を行った際の方向許容範囲（-1.0〜1.0））
 	var ASYNCHRONOUS = true; // 非同期
 	var WAIT_COUNT_SWIPE = 6; // スワイプによる継続的ドラッグ操作の待ちフレーム
 	var WAIT_COUNT_DOUBLE_SWIPE = 4; // ダブルスワイプによる継続的ドラッグ操作の待ちフレーム
