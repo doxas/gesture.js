@@ -250,6 +250,7 @@ function gestureJsCommon(){}
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
+				eo.targetStartX = -1; eo.targetStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.applyFlg = false;
 				if(eo.startCallback){eo.startCallback(eve);}
 			},
@@ -266,6 +267,10 @@ function gestureJsCommon(){}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
+					if(eo.targetStartX < 0){
+						eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
+						eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
+					}
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(eo.downCount > WAIT_COUNT_PINCH && v.length > PINCH_LENGTH){
@@ -278,7 +283,7 @@ function gestureJsCommon(){}
 							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								eo.applyFlg = true;
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback(eve);}
+								if(eo.moveCallback){eo.moveCallback(eve, eo);}
 							}
 						}
 					}
@@ -300,6 +305,7 @@ function gestureJsCommon(){}
 				if(eo.downFlg){return;}
 				eo.startX = p.px; eo.startY = p.py;
 				eo.secondStartX = -1; eo.secondStartY = -1;
+				eo.targetStartX = -1; eo.targetStartY = -1;
 				eo.downCount = 1; eo.downFlg = true; eo.startLength = -1;
 				if(eo.startCallback){eo.startCallback(eve);}
 			},
@@ -315,6 +321,10 @@ function gestureJsCommon(){}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
+					if(eo.targetStartX < 0){
+						eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
+						eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
+					}
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(eo.downCount > WAIT_COUNT_PINCH - DURATION_SUBTRACT && v.length > PINCH_LENGTH){
@@ -328,7 +338,7 @@ function gestureJsCommon(){}
 							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
 							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
-								if(eo.moveCallback){eo.moveCallback(eve);}
+								if(eo.moveCallback){eo.moveCallback(eve, eo);}
 							}
 							eo.startLength = l;
 						}
@@ -390,10 +400,12 @@ function gestureJsCommon(){}
 
 	// = event object =========================================================
 	function eventObject(startCallback, endCallback, moveCallback){
-		this.startX = 0;
+		this.startX = 0;       // drag start position first finger
 		this.startY = 0;
-		this.secondStartX = 0;
+		this.secondStartX = 0; // drag start position second finger
 		this.secondStartY = 0;
+		this.targetStartX = 0; // middle point from first to second
+		this.targetStartY = 0;
 		this.startLength = 0;
 		this.downCount = 0;
 		this.downFlg = false;
