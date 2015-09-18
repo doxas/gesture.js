@@ -267,10 +267,6 @@ function gestureJsCommon(){}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
-					if(eo.targetStartX < 0){
-						eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
-						eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
-					}
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(eo.downCount > WAIT_COUNT_PINCH && v.length > PINCH_LENGTH){
@@ -281,6 +277,10 @@ function gestureJsCommon(){}
 							var w = vector(eo.secondStartX, eo.secondStartY, q.px, q.py);
 							if(eo.applyFlg ||
 							   dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
+								if(eo.targetStartX < 0){
+									eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
+									eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
+								}
 								eo.applyFlg = true;
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback(eve, eo);}
@@ -321,10 +321,6 @@ function gestureJsCommon(){}
 				var p = eventHub(eve, 0);
 				var q = eventHub(eve, 1);
 				if(eo.downFlg && q != null){
-					if(eo.targetStartX < 0){
-						eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
-						eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
-					}
 					++eo.downCount;
 					var v = vector(eo.startX, eo.startY, p.px, p.py);
 					if(eo.downCount > WAIT_COUNT_PINCH - DURATION_SUBTRACT && v.length > PINCH_LENGTH){
@@ -337,6 +333,10 @@ function gestureJsCommon(){}
 							var l = length2d(p.px, p.py, q.px, q.py);
 							var f = (type === 'pinch in') ? (eo.startLength < l) : (eo.startLength > l);
 							if(f && dot2d(v.vx, v.vy, w.vx, w.vy) < -DOT_PRODUCT_PINCH_RANGE){
+								if(eo.targetStartX < 0){
+									eo.targetStartX = (eo.startX + eo.secondStartX) / 2.0;
+									eo.targetStartY = (eo.startY + eo.secondStartY) / 2.0;
+								}
 								if(!ASYNCHRONOUS){syncFlg = true; eo.entryFlg = true;}
 								if(eo.moveCallback){eo.moveCallback(eve, eo);}
 							}
