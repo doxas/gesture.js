@@ -1,18 +1,12 @@
 
+/*global GJS*/
+
 window.onload = function(){
-	GJS.setParam(null, null, null, null, true); // sync => false, async => true
-	GJS.swipe(window, null, null, function(){console.log('swipe!');});
-	GJS.swipeUp(window, null, null, function(){console.log('swipe up!!');});
-	GJS.swipeDown(window, null, null, function(){console.log('swipe down!!');});
-	GJS.swipeLeft(window, null, null, function(){console.log('swipe left!!');});
-	GJS.swipeRight(window, null, null, function(){console.log('swipe right!!');});
-	GJS.doubleSwipe(window, null, null, function(){console.log('double swipe!');});
-	GJS.doubleSwipeUp(window, null, null, function(){console.log('double swipe up!!');});
-	GJS.doubleSwipeDown(window, null, null, function(){console.log('double swipe down!!');});
-	GJS.doubleSwipeLeft(window, null, null, function(){console.log('double swipe left!!');});
-	GJS.doubleSwipeRight(window, null, null, function(){console.log('double swipe right!!');});
-	GJS.pinch(window, null, null, function(){console.log('pinch!');});
-	GJS.pinchIn(window, null, null, function(){console.log('pinch in!!');});
-	GJS.pinchOut(window, null, null, function(){console.log('pinch out!!');});
+    var e = document.getElementById('paragraph');
+    var g = new GJS(document.body);
+    g.addEventListener('pinch',       function(eve){e.textContent = 'pinch '       + eve.pageX;});
+    g.addEventListener('pinchIn',     function(eve){e.textContent = 'pinchIn '     + eve.pageX;});
+    g.addEventListener('pinchOut',    function(eve){e.textContent = 'pinchOut '    + eve.pageX;});
+    g.addEventListener('pinchRotate', function(eve){e.textContent = 'pinchRotate ' + eve.pageX;});
 };
 
